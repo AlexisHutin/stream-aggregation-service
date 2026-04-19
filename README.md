@@ -98,6 +98,8 @@ Request flow:
 - SSE for streaming input
 - Layered structure for maintainability
 - Table-driven unit tests + Venom integration tests
+- Integration testing with [🐍Venom](https://github.com/ovh/venom)
+- Mocked external dependencies using [Smocker](https://github.com/smocker-dev/smocker)
 
 ## Known Trade-offs
 
