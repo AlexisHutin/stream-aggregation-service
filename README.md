@@ -105,7 +105,7 @@ Request flow:
 ## Known Trade-offs
 
 - In-memory collection of window events
-- Exact percentile computation currently relies on full sorting ($O(n \log n)$), which increases CPU cost and response latency on large windows, and requires keeping all metric values in memory.
+- Exact percentile computation currently relies on full sorting, which increases CPU cost and response latency on large windows, and requires keeping all metric values in memory.
 - New SSE connection per analysis request
 - No cache/shared stream fan-out yet
 
@@ -173,7 +173,7 @@ Unit tests:
 go test ./...
 ```
 
-Integration prerequisites (installs Venom if needed and restarts `smocker`):
+Integration prerequisites (installs Venom if needed and (re)starts `smocker`):
 
 ```bash
 make integration-dependencies
@@ -197,7 +197,7 @@ make ci
 
 - `make build`: compile the service binary to `./build/stream-aggregation-service`
 - `make run`: start development mode with `reflex` (auto-reload) and load `.env` if present
-- `make test`: run all Go tests with a coverage profile output in `./build/coverage.out`
+- `make test`: run all Go tests with a coverage profile output in `./build/coverage.txt`
 - `make integration-dependencies`: install Venom if missing and (re)start the `smocker` container
 - `make integration`: run Venom integration test suites under `tests/venom`
 - `make ci`: run the full local CI flow (build -> integration dependencies -> start service -> integration)
