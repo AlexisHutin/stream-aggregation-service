@@ -57,16 +57,13 @@ func AnalysisHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, types.APIResponse{
-		Status: "ok",
-		Data:   buildAnalysisResponseData(params.Dimension, eventsAnalysis),
-	})
+	c.JSON(http.StatusOK, buildAnalysisResponseData(params.Dimension, eventsAnalysis))
 }
 
 // buildAnalysisResponseData formats the analysis result with percentile keys
 // derived from the requested dimension (for example likes_p50).
-func buildAnalysisResponseData(dimension types.Dimension, result types.EventsAnalysisResult) gin.H {
-	return gin.H{
+func buildAnalysisResponseData(dimension types.Dimension, result types.EventsAnalysisResult) map[string]interface{} {
+	return map[string]interface{}{
 		"total_posts":                    result.TotalPosts,
 		"minimum_timestamp":              result.MinimumTimestamp,
 		"maximum_timestamp":              result.MaximumTimestamp,

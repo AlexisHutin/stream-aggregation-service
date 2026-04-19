@@ -40,15 +40,12 @@ Example output (`GET /analysis?duration=5s&dimension=comments`):
 
 ```json
 {
-   "status": "ok",
-   "data": {
-      "total_posts": 128,
-      "minimum_timestamp": 1713405601,
-      "maximum_timestamp": 1713405606,
-      "comments_p50": 12,
-      "comments_p90": 41,
-      "comments_p99": 93
-   }
+   "total_posts": 128,
+   "minimum_timestamp": 1713405601,
+   "maximum_timestamp": 1713405606,
+   "comments_p50": 12,
+   "comments_p90": 41,
+   "comments_p99": 93
 }
 ```
 

@@ -18,6 +18,8 @@ testcases:
         url: "{{ .service_endpoint }}/analysis?duration=1s&dimension=comments"
         assertions:
           - result.statuscode ShouldEqual 200
+          - result.headers.Content-Type ShouldContainSubstring "application/json"
+          - result.headers.Content-Length ShouldNotBeEmpty
 
       # Bad params call
       - type: http
