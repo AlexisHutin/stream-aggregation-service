@@ -9,6 +9,9 @@
   - [Overview](#overview)
   - [Architecture](#architecture)
   - [Tech Stack](#tech-stack)
+  - [Benchmarks](#benchmarks)
+    - [Percentile benchmarks](#percentile-benchmarks)
+    - [ComputeAnalysisStats benchmarks](#computeanalysisstats-benchmarks)
   - [Known Trade-offs](#known-trade-offs)
   - [Prerequisites](#prerequisites)
   - [Configuration](#configuration)
@@ -99,6 +102,48 @@ Request flow:
 - Layered structure for maintainability
 - Table-driven unit tests + Venom integration tests
 
+## Benchmarks
+
+Run benchmarks and regenerate benchmark tables/charts in the README:
+
+```bash
+make benchmark
+```
+
+This command:
+
+- runs Go benchmarks with memory metrics (`ns/op`, `B/op`, `allocs/op`)
+- writes raw output to `./build/bench.txt`
+- renders split benchmark artifacts via `scripts/bench-render.sh`
+- updates the README block between `<!-- BENCHMARKS START -->` and `<!-- BENCHMARKS END -->`
+
+<!-- BENCHMARKS START -->
+### Percentile benchmarks
+
+| Benchmark | ns/op | B/op | allocs |
+|----------|------:|-----:|-------:|
+| BenchmarkPercentile_P99_10k-8 | 1.264 | 0 | 0 |
+| BenchmarkPercentile_P99_Scales/N_50000-8 | 2.579 | 0 | 0 |
+| BenchmarkPercentile_P99_Scales/N_100000-8 | 2.579 | 0 | 0 |
+| BenchmarkPercentile_P99_Scales/N_500000-8 | 2.579 | 0 | 0 |
+| BenchmarkPercentile_P99_Scales/N_1000000-8 | 2.588 | 0 | 0 |
+
+![Percentile benchmarks](./assets/bench-percentile.png)
+
+### ComputeAnalysisStats benchmarks
+
+| Benchmark | ns/op | B/op | allocs |
+|----------|------:|-----:|-------:|
+| BenchmarkComputeAnalysisStats_10k-8 | 428760 | 81922 | 1 |
+| BenchmarkComputeAnalysisStats_Scales/N_50000-8 | 1927600 | 401408 | 1 |
+| BenchmarkComputeAnalysisStats_Scales/N_100000-8 | 3859886 | 802816 | 1 |
+| BenchmarkComputeAnalysisStats_Scales/N_500000-8 | 18673494 | 4005889 | 1 |
+| BenchmarkComputeAnalysisStats_Scales/N_1000000-8 | 37621573 | 8003584 | 1 |
+
+![ComputeAnalysisStats benchmarks](./assets/bench-compute.png)
+
+<!-- BENCHMARKS END -->
+
 ## Known Trade-offs
 
 - In-memory collection of window events
@@ -111,6 +156,7 @@ Request flow:
 - Go (version compatible with `go.mod`)
 - Docker (for integration dependencies)
 - `curl` (used by `make integration-dependencies` to install Venom if missing)
+- `gnuplot` (required by `make benchmark` to render benchmark charts)
 
 ## Configuration
 
@@ -195,6 +241,7 @@ make ci
 - `make build`: compile the service binary to `./build/stream-aggregation-service`
 - `make run`: start development mode with `reflex` (auto-reload) and load `.env` if present
 - `make test`: run all Go tests with a coverage profile output in `./build/coverage.txt`
+- `make benchmark`: run benchmarks and regenerate benchmark tables/charts in the README
 - `make integration-dependencies`: install Venom if missing and (re)start the `smocker` container
 - `make integration`: run Venom integration test suites under `tests/venom`
 - `make ci`: run the full local CI flow (build -> integration dependencies -> start service -> integration)
