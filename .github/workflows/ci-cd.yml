@@ -30,9 +30,10 @@ jobs:
         continue-on-error: true
         with:
           path: ./
-          base: "${{ github.event.repository.default_branch }}"
-          head: HEAD
           extra_args: --debug
+          # For PRs: scan only the PR diff range
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          head: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Scan Results Status
         if: steps.trufflehog.outcome == 'failure'
