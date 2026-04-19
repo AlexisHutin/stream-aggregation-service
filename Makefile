@@ -30,7 +30,7 @@ lint:
 .PHONY: test
 # Run all unit tests and generate a coverage profile.
 test:
-	go test -v ./... -coverprofile=./build/coverage.out
+	go test -v ./... -coverprofile=./build/coverage.txt
 
 .PHONY: integration-dependencies
 # Prepare integration dependencies: Venom binary and smocker container.

@@ -1,18 +1,22 @@
 # Stream Aggregation Service
 
+[![CI/CD Docker](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml)
+
 ## Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Known Trade-offs](#known-trade-offs)
-- [Prerequisites](#prerequisites)
-- [Configuration](#configuration)
-- [Run Locally](#run-locally)
-- [Run with Docker](#run-with-docker)
-- [Testing](#testing)
-- [Useful Make Targets](#useful-make-targets)
-- [Possible Improvements](#possible-improvements)
+- [Stream Aggregation Service](#stream-aggregation-service)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Architecture](#architecture)
+  - [Tech Stack](#tech-stack)
+  - [Known Trade-offs](#known-trade-offs)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Run Locally](#run-locally)
+  - [Run with Docker](#run-with-docker)
+  - [Testing](#testing)
+  - [Useful Make Targets](#useful-make-targets)
+  - [Possible Improvements](#possible-improvements)
 
 ## Overview
 
