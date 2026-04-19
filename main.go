@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,6 +26,10 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger(), gin.Recovery())
 	router.GET("/analysis", controllers.AnalysisHandler)
+	// Health check endpoint
+	router.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, nil)
 	})
@@ -45,8 +50,8 @@ func main() {
 	go func() {
 		defer wg.Done()
 		log.Printf("Starting server on %s\n", port)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("HTTP server ListenAndServe error: %v", err)
+		if err = server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("HTTP server ListenAndServe error: %v", err)
 		}
 	}()
 
@@ -57,8 +62,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("HTTP server Shutdown error: %v", err)
+	if err = server.Shutdown(ctx); err != nil {
+		log.Printf("HTTP server Shutdown error: %v", err)
 	}
 
 	wg.Wait()

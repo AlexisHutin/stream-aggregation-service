@@ -1,7 +1,9 @@
 package eventsanalyser
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -13,6 +15,12 @@ import (
 	"github.com/AlexisHutin/stream-aggregation-service/types"
 )
 
+// EventsAnalyser orchestrates event collection from SSE and computes analysis
+// results for requested dimensions and windows.
+type EventsAnalyser struct {
+	sseClient *sse.Client
+}
+
 // NewEventsAnalyser builds an analyser configured to consume events from the
 // given SSE stream URL.
 func NewEventsAnalyser(sseStreamURL string) *EventsAnalyser {
@@ -21,17 +29,14 @@ func NewEventsAnalyser(sseStreamURL string) *EventsAnalyser {
 	}
 }
 
-// EventsAnalyser orchestrates event collection from SSE and computes analysis
-// results for requested dimensions and windows.
-type EventsAnalyser struct {
-	sseClient *sse.Client
-}
-
 // EventsAnalysis collects events for the provided duration and returns an
 // aggregated analysis result for the selected dimension.
-func (ea *EventsAnalyser) EventsAnalysis(dimension types.Dimension, duration time.Duration) (types.EventsAnalysisResult, error) {
-
-	streamReader, streamCloser, err := ea.sseClient.OpenStreamReader()
+func (ea *EventsAnalyser) EventsAnalysis(
+	ctx context.Context,
+	dimension types.Dimension,
+	duration time.Duration,
+) (types.EventsAnalysisResult, error) {
+	streamReader, streamCloser, err := ea.sseClient.OpenStreamReader(ctx)
 	if err != nil {
 		return types.EventsAnalysisResult{}, fmt.Errorf("failed to open SSE stream: %w", err)
 	}
@@ -120,7 +125,7 @@ func decodeSocialPost(payload string) (socialPost, error) {
 	}
 
 	if len(envelope) == 0 {
-		return socialPost{}, fmt.Errorf("empty payload object")
+		return socialPost{}, errors.New("empty payload object")
 	}
 
 	for _, raw := range envelope {
@@ -131,7 +136,7 @@ func decodeSocialPost(payload string) (socialPost, error) {
 		return post, nil
 	}
 
-	return socialPost{}, fmt.Errorf("missing social post object")
+	return socialPost{}, errors.New("missing social post object")
 }
 
 // extractDimensionMetric returns the metric value of an event for the selected
@@ -161,7 +166,7 @@ func computeAnalysisStats(samples []dimensionSample) computedStats {
 
 	stats.MinimumTimestamp = samples[0].Timestamp
 	stats.MaximumTimestamp = samples[0].Timestamp
-	
+
 	metricValues := make([]int, 0, len(samples))
 	for _, sample := range samples {
 		metricValues = append(metricValues, sample.Metric)

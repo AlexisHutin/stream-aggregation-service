@@ -2,6 +2,7 @@ package sse
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,8 +25,8 @@ func NewClient(streamURL string) *Client {
 
 // OpenStreamReader opens the SSE stream and returns a buffered reader and a
 // closer for the underlying response body.
-func (c *Client) OpenStreamReader() (*bufio.Reader, io.Closer, error) {
-	request, err := http.NewRequest(http.MethodGet, c.StreamURL, nil)
+func (c *Client) OpenStreamReader(ctx context.Context) (*bufio.Reader, io.Closer, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, c.StreamURL, nil)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to build SSE request: %w", err)
 	}
@@ -37,7 +38,13 @@ func (c *Client) OpenStreamReader() (*bufio.Reader, io.Closer, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		response.Body.Close()
+		err = response.Body.Close()
+		if err != nil {
+			return nil, nil, fmt.Errorf(
+				"unexpected SSE response status: %s, failed to close response body: %w",
+				response.Status, err,
+			)
+		}
 		return nil, nil, fmt.Errorf("unexpected SSE response status: %s", response.Status)
 	}
 

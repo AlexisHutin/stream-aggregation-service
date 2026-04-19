@@ -12,8 +12,8 @@ const (
 )
 
 type AnalysisRequestParams struct {
-	Duration  time.Duration  `json:"duration"`
-	Dimension Dimension `json:"dimension"`
+	Duration  time.Duration `json:"duration"`
+	Dimension Dimension     `json:"dimension"`
 }
 
 type APIResponse struct {
