@@ -10,6 +10,7 @@ service_endpoint = http://localhost:8080
 mock_server = http://localhost:8083
 
 .PHONY: run
+# Run the service in development mode with auto-reload via reflex.
 run:
 	@if [ -f $(ENV_FILE) ]; then \
 		set -a; source $(ENV_FILE); set +a; \
@@ -17,18 +18,22 @@ run:
 	reflex -c reflex.conf
 
 .PHONY: build
+# Build the binary in ./build.
 build:
 	go build -o ./build/stream-aggregation-service main.go
 
 .PHONY: lint
+# Run static analysis with golangci-lint.
 lint:
 	golangci-lint run --config .golangci.yml
 
 .PHONY: test
+# Run all unit tests and generate a coverage profile.
 test:
 	go test -v ./... -coverprofile=./build/coverage.out
 
 .PHONY: integration-dependencies
+# Prepare integration dependencies: Venom binary and smocker container.
 integration-dependencies:	
 	@if [ ! -x "$(VENOM)" ]; then \
 		echo "Installing venom..."; \
@@ -51,6 +56,7 @@ integration-dependencies:
 		ghcr.io/smocker-dev/smocker
 
 .PHONY: integration
+# Execute integration test suites with Venom.
 integration:
 	NO_GELF=true "$(VENOM)" run './tests/venom/$(suite)' \
 		-v \
@@ -61,19 +67,23 @@ integration:
 
 #== DOCKER ==#
 .PHONY: run-docker
+# Run the service container locally.
 run-docker:
 	docker run --env-file $(ENV_FILE) -v $(PWD)/config.json:/config.json:ro -p 8080:8080 stream-aggregation-service:latest
 
 .PHONY: build-docker
+# Build the Docker image.
 build-docker:
 	docker build -t stream-aggregation-service:latest .
 
 #== UTILITY ==#
 .PHONY: coverage
+# Generate an HTML coverage report from build artifacts.
 coverage:
 	go tool cover -html=./build/coverage.out -o ./build/coverage.html
 
 .PHONY: clean
+# Remove integration container and clean build artifacts.
 clean:
 	@echo "Removing smocker container..."; \
 	docker rm -f smocker >/dev/null; 
@@ -81,6 +91,7 @@ clean:
 	rm -rf ./build/*
 
 .PHONY: ci
+# Run local CI flow: build, prepare integration deps, run service, run integration tests.
 ci: build integration-dependencies
 	@set -euo pipefail; \
 	if [ -f $(TEST_ENV_FILE) ]; then \
