@@ -209,3 +209,4 @@ make ci
 - Shared SSE consumption across requests
 - Better network resilience/retry strategy
 - Caching and richer observability
+- Helm chart for Kubernetes deployment (enables scaling, resource management, etc.)
