@@ -1,0 +1,34 @@
+name: Test Analysis endpoint
+version: "2"
+testcases: 
+  - name: HTTP
+    description: 
+    steps: 
+      # Mocks setup
+      - type: http
+        method: POST
+        url: "{{ .mock_server }}/mocks?reset=true"
+        bodyFile: ./mocks.yml
+        assertions:
+          - result.statuscode ShouldEqual 200
+      
+      # Correct call
+      - type: http
+        method: GET
+        url: "{{ .service_endpoint }}/analysis?duration=1s&dimension=comments"
+        assertions:
+          - result.statuscode ShouldEqual 200
+
+      # Bad params call
+      - type: http
+        method: GET
+        url: "{{ .service_endpoint }}/analysis?duration=0s&dimension=comments"
+        assertions:
+          - result.statuscode ShouldEqual 400
+      
+      - type: http
+        method: GET
+        url: "{{ .service_endpoint }}/analysis?duration=1s&dimension=toto"
+        assertions:
+          - result.statuscode ShouldEqual 400
+      

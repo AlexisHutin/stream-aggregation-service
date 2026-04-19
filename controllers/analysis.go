@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,9 +27,9 @@ func AnalysisHandler(c *gin.Context) {
 		})
 		return
 	}
-
-	var params types.AnalysisRequestParams
+	ctx := c.Request.Context()
 	query := c.Request.URL.Query()
+	var params types.AnalysisRequestParams
 
 	params, err := parseAndValidateParams(query)
 	if err != nil {
@@ -47,7 +48,7 @@ func AnalysisHandler(c *gin.Context) {
 	eventsanalyser := ea.NewEventsAnalyser(configs.StreamURL)
 
 	log.Printf("Performing analysis for dimension: %s, duration: %s\n", params.Dimension, params.Duration)
-	eventsAnalysis, err := eventsanalyser.EventsAnalysis(params.Dimension, params.Duration)
+	eventsAnalysis, err := eventsanalyser.EventsAnalysis(ctx, params.Dimension, params.Duration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, types.APIResponse{
 			Status: "error",
@@ -55,8 +56,6 @@ func AnalysisHandler(c *gin.Context) {
 		})
 		return
 	}
-
-	log.Printf("Analysis result: %+v\n", eventsAnalysis)
 
 	c.JSON(http.StatusOK, types.APIResponse{
 		Status: "ok",
@@ -81,29 +80,29 @@ func buildAnalysisResponseData(dimension types.Dimension, result types.EventsAna
 //
 // Required parameters are:
 // - duration: a positive Go duration string (for example, 5s, 30m or 1h)
-// - dimension: one of the supported dimensions
+// - dimension: one of the supported dimensions.
 func parseAndValidateParams(query url.Values) (types.AnalysisRequestParams, error) {
 	var params types.AnalysisRequestParams
 
 	durationStr := strings.TrimSpace(query.Get("duration"))
 	if durationStr == "" {
-		return params, fmt.Errorf("missing required query parameter: duration")
+		return params, errors.New("missing required query parameter: duration")
 	}
 
 	validDuration, err := time.ParseDuration(durationStr)
 	if err != nil {
-		return params, fmt.Errorf("invalid duration format")
+		return params, errors.New("invalid duration format")
 	}
 
 	if validDuration <= 0 {
-		return params, fmt.Errorf("invalid duration value")
+		return params, errors.New("invalid duration value")
 	}
 
 	params.Duration = validDuration
 
 	dimensionStr := strings.TrimSpace(query.Get("dimension"))
 	if dimensionStr == "" {
-		return params, fmt.Errorf("missing required query parameter: dimension")
+		return params, errors.New("missing required query parameter: dimension")
 	}
 
 	if !isValidDimension(types.Dimension(dimensionStr)) {

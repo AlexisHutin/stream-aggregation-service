@@ -1,0 +1,12 @@
+name: Ping server
+version: "2"
+testcases:
+# Ping server to check if it run
+  - name: Ping server
+    steps: 
+      - type: http
+        method: GET 
+        url: "{{ .service_endpoint }}/ping"
+        assertions:
+        retry: 10
+        delay: 1
