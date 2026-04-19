@@ -1,6 +1,6 @@
 # Stream Aggregation Service
 
-[![CI/CD Docker](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml)
+[![CI/CD Docker](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml/badge.svg?branch=main)](https://github.com/AlexisHutin/stream-aggregation-service/actions/workflows/ci-cd.yml) [![codecov](https://codecov.io/gh/AlexisHutin/stream-aggregation-service/branch/main/graph/badge.svg)](https://codecov.io/gh/AlexisHutin/stream-aggregation-service)
 
 ## Table of Contents
 
