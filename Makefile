@@ -32,6 +32,13 @@ lint:
 test:
 	go test -v ./... -coverprofile=./build/coverage.txt
 
+.PHONY: benchmark
+# Run benchmarks and measure memory allocations.
+# Results are saved to ./build/bench.txt and rendered to PNG charts in ./assets.
+benchmark:
+	go test -v ./... -bench=. -benchmem -run=^# $>> ./build/bench.txt; \
+	./scripts/bench-render.sh
+
 .PHONY: integration-dependencies
 # Prepare integration dependencies: Venom binary and smocker container.
 integration-dependencies:	

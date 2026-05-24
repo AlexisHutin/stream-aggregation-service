@@ -1,6 +1,7 @@
 package eventsanalyser
 
 import (
+	"fmt"
 	"math"
 	"testing"
 )
@@ -124,4 +125,88 @@ func TestComputeAnalysisStats_UnsortedTimestamps(t *testing.T) {
 		t.Fatalf("expected max timestamp 3000, got %d", stats.MaximumTimestamp)
 	}
 	_ = math.MaxInt // keep import used
+}
+
+// BenchmarkPercentile_P99_10k measures pure percentile lookup cost on an
+// already sorted 10k slice. It helps track regressions in the percentile
+// function itself, independently from sorting/allocation overhead.
+func BenchmarkPercentile_P99_10k(b *testing.B) {
+	values := make([]int, 10_000)
+	for i := range values {
+		values[i] = i
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = percentile(values, 0.99)
+	}
+}
+
+// BenchmarkComputeAnalysisStats_10k measures end-to-end stats computation on
+// 10k events, including metric extraction bookkeeping and internal sorting for
+// percentile calculation. Use ns/op and B/op to monitor scalability impact.
+func BenchmarkComputeAnalysisStats_10k(b *testing.B) {
+	samples := make([]dimensionSample, 10_000)
+	for i := range samples {
+		samples[i] = dimensionSample{
+			Timestamp: int64(1_700_000_000 + i),
+			Metric:    (i * 37) % 1000,
+		}
+	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		_ = computeAnalysisStats(samples)
+	}
+}
+
+// BenchmarkPercentile_P99_Scales measures percentile lookup across larger
+// sorted datasets to observe scaling behavior with realistic high volumes.
+func BenchmarkPercentile_P99_Scales(b *testing.B) {
+	sizes := []int{50_000, 100_000, 500_000, 1_000_000}
+
+	for _, size := range sizes {
+		b.Run(fmt.Sprintf("N_%d", size), func(b *testing.B) {
+			values := make([]int, size)
+			for i := range values {
+				values[i] = i
+			}
+
+			b.ReportAllocs()
+			b.ResetTimer()
+
+			for i := 0; i < b.N; i++ {
+				_ = percentile(values, 0.99)
+			}
+		})
+	}
+}
+
+// BenchmarkComputeAnalysisStats_Scales measures end-to-end stats computation
+// at larger sizes (including sorting) to track CPU and allocation growth.
+func BenchmarkComputeAnalysisStats_Scales(b *testing.B) {
+	sizes := []int{50_000, 100_000, 500_000, 1_000_000}
+
+	for _, size := range sizes {
+		b.Run(fmt.Sprintf("N_%d", size), func(b *testing.B) {
+			samples := make([]dimensionSample, size)
+			for i := range samples {
+				samples[i] = dimensionSample{
+					Timestamp: int64(1_700_000_000 + i),
+					Metric:    (i * 37) % 1000,
+				}
+			}
+
+			b.ReportAllocs()
+			b.ResetTimer()
+
+			for i := 0; i < b.N; i++ {
+				_ = computeAnalysisStats(samples)
+			}
+		})
+	}
 }
